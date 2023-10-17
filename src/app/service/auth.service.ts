@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as jwt from 'jsonwebtoken';
+import { Observable } from 'rxjs';
 
 
 // Rest of your code...
@@ -15,6 +16,12 @@ export class AuthService {
   login(username: string, password: string) {
     return this.http.post<any>(`${this.SERVERB_URL}/login`, { username: username, password: password });
   }
+
+  refreshToken(): Observable<any> {
+    // Gửi yêu cầu refresh token đến máy chủ và nhận lại access token mới
+    return this.http.post<any>(`${this.SERVERB_URL}/refresh`, null);
+  }
+
 
   saveToken(token: string) {
     localStorage.setItem('access_token', token);
