@@ -1,6 +1,10 @@
-<div *ngIf="authService.isAuthenticated(); else loginForm">
+<div *ngIf="authService.isAuthenticated()">
   <h1>Welcome, {{ username }}!</h1>
-  <button >Logout</button>
+
+  <p>Access Token: {{access_token}}</p>
+  <p>Refresh Token: {{refresh_token}}</p>
+
+  <button (click)="refreshToken()">Refresh</button>
 
   <h2>Actors:</h2>
   <ul>
@@ -12,7 +16,3 @@
     <li *ngFor="let film of films">{{ film.title }}</li>
   </ul>
 </div>
-<ng-template #loginForm>
-  <!-- <h1>Login</h1>
-  <button (click)="login()">Login</button> -->
-</ng-template>

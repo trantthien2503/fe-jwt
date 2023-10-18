@@ -4,29 +4,55 @@ import { AuthService } from './service/auth.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  username: string='admin';
-  password: string='password';
+  username: string = 'admin';
+  password: string = 'password';
   actors: any[];
   films: any[];
-
+  access_token: string = '';
+  refresh_token: string = '';
   constructor(public authService: AuthService) {
-    this.actors= [];
-    this.films = []
+    this.actors = [];
+    this.films = [];
   }
 
   ngOnInit() {
-    this.authService.login(this.username, this.password).subscribe((response: any)=>{
-      if(response){
-        const { access_token } = response;
-        this.authService.saveToken(access_token);
-        this.loadActors();
-        this.loadFilms();
-      }
-    });
+    this.authService
+      .login(this.username, this.password)
+      .subscribe((response: any) => {
+        if (response) {
+          const { access_token, refresh_token } = response;
+          this.access_token = access_token;
+          this.refresh_token = refresh_token;
+          this.authService.saveAccessToken(this.access_token);
+          this.authService.saveRefreshToken(this.refresh_token);
 
+          this.loadActors();
+          this.loadFilms();
+        }
+      });
+  }
+
+  refreshToken() {
+    this.authService.refreshToken().subscribe(
+      (response: any) => {
+        if (response) {
+          const { access_token, refresh_token } = response;
+          this.access_token = access_token;
+          this.refresh_token = refresh_token;
+          this.authService.saveAccessToken(this.access_token);
+          this.authService.saveRefreshToken(this.refresh_token);
+
+          this.loadActors();
+          this.loadFilms();
+        }
+      },
+      (error: any) => {
+        console.error(error);
+      }
+    );
   }
 
   loadActors() {

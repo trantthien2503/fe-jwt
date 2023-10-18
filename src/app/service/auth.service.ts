@@ -1,12 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import * as jwt from 'jsonwebtoken';
 import { Observable } from 'rxjs';
 
-
-// Rest of your code...
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private SERVERB_URL = 'http://127.0.0.1:5000'; // Thay thế bằng URL thực tế của máy chủ
@@ -14,26 +11,29 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string) {
-    return this.http.post<any>(`${this.SERVERB_URL}/login`, { username: username, password: password });
+    return this.http.post<any>(`${this.SERVERB_URL}/login`, {
+      username: username,
+      password: password,
+    });
   }
 
   refreshToken(): Observable<any> {
-    // Gửi yêu cầu refresh token đến máy chủ và nhận lại access token mới
-    return this.http.post<any>(`${this.SERVERB_URL}/refresh`, null);
+    const refresh_token = localStorage.getItem('refresh_token');
+    const headers = new HttpHeaders({
+      Authorization: 'Bearer ' + refresh_token,
+    });
+    return this.http.post<any>(`${this.SERVERB_URL}/refresh`, null, {
+      headers,
+    });
   }
 
-
-  saveToken(token: string) {
+  saveAccessToken(token: string) {
     localStorage.setItem('access_token', token);
   }
 
-  // getDecodedToken() {
-  //   const token = localStorage.getItem('access_token');
-  //   if (token) {
-  //     return jwt_decode(token);
-  //   }
-  //   return null;
-  // }
+  saveRefreshToken(token: string) {
+    localStorage.setItem('refresh_token', token);
+  }
 
   isAuthenticated() {
     const token = localStorage.getItem('access_token');
@@ -42,13 +42,22 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   }
 
   getActors() {
-    return this.http.get<any[]>(`${this.SERVERB_URL}/actors`);
+    const access_token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders({
+      Authorization: 'Bearer ' + access_token,
+    });
+    return this.http.get<any[]>(`${this.SERVERB_URL}/actors`, { headers });
   }
 
   getFilms() {
-    return this.http.get<any[]>(`${this.SERVERB_URL}/films`);
+    const access_token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders({
+      Authorization: 'Bearer ' + access_token,
+    });
+    return this.http.get<any[]>(`${this.SERVERB_URL}/films`, { headers });
   }
 }
